@@ -14,5 +14,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     boolean existsByRole(String role); // For checking if an ADMIN exists
     boolean existsByUsername(String username);  // This enables existsByUsername()
     boolean existsByEmail(String email);  
+    boolean existsByContactNumber(String ContactNumber);
+
 }
 

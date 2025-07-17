@@ -6,12 +6,20 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
-@Data
-public class AdminDTO {
+import org.springframework.beans.factory.annotation.Autowired;
 
+import com.aptpath.payflowapi.service.AuthService;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+@Data
+@Schema(description = "Admin registration DTO")
+public class AdminDTO {
+	
+	@Schema(description = "Username must be unique")
     @NotBlank(message = "Username is required")
     private String username;
-
+    
+    @Schema(description = "Password (min 6 characters)")
     @NotBlank(message = "Password is required")
     @Size(min = 6, message = "Password must be at least 6 characters")
     @Pattern(
@@ -20,10 +28,12 @@ public class AdminDTO {
     )
     private String password;
 
+    @Schema(description = "Email address", example = "admin@example.com")
     @NotBlank(message = "Email is required")
     @Email(message = "Invalid email format")
     private String email;
 
+    @Schema(description = "Contact number", example = "9876543210")
     @NotBlank(message = "Contact number is required")
     @Pattern(
         regexp = "^[6-9]\\d{9}$",
