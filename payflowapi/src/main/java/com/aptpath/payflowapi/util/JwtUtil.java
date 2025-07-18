@@ -1,6 +1,7 @@
 package com.aptpath.payflowapi.util;
 
 import java.util.Date;
+import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
@@ -13,10 +14,10 @@ public class JwtUtil {
     private final String SECRET = "81DAB887CBC2C21AEF44211B28B156CF305181B5E7DAAD588B948C12392534C3";
     private final long EXPIRATION = 86400000; // 1 day
 
-    public String generateToken(String username, String role) {
+    public String generateToken(String username, Map<String, Object> claims) {
         return Jwts.builder()
             .setSubject(username)
-            .claim("role", role)
+            .setClaims(claims)
             .setIssuedAt(new Date())
             .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
             .signWith(SignatureAlgorithm.HS256, SECRET)

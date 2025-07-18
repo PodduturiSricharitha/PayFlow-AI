@@ -10,9 +10,9 @@ import com.aptpath.payflowapi.entity.User;
 public interface UserRepository extends JpaRepository<User, Integer> {
 
     Optional<User> findByUsername(String username);
-
-    boolean existsByRole(String role); // For checking if an ADMIN exists
-    boolean existsByUsername(String username);  // This enables existsByUsername()
+    
+    boolean existsByRole(String role); 
+    boolean existsByUsername(String username); 
     boolean existsByEmail(String email);  
     boolean existsByContactNumber(String ContactNumber);
 

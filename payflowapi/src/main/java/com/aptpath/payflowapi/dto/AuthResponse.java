@@ -4,11 +4,10 @@ public class AuthResponse {
     private String token;
    
     public AuthResponse(String token) {
-    	System.out.println("Login Success");
         this.token = token;
         
     }
-
+    
 	public String getToken() {
 		return token;
 	}
@@ -16,7 +15,6 @@ public class AuthResponse {
 	public void setToken(String token) {
 		this.token = token;
 	}
-
     
 }
 

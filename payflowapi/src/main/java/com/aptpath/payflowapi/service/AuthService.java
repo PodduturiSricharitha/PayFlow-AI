@@ -1,7 +1,13 @@
 package com.aptpath.payflowapi.service;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.kafka.KafkaProperties.Admin;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -15,7 +21,9 @@ import jakarta.validation.Valid;
 import com.aptpath.payflowapi.dto.AdminDTO;
 import com.aptpath.payflowapi.dto.AuthResponse;
 import com.aptpath.payflowapi.dto.LoginDTO;
+import com.aptpath.payflowapi.dto.ManagerDTO;
 import com.aptpath.payflowapi.dto.RegisterRequest;
+import com.aptpath.payflowapi.dto.ResetPasswordDTO;
 @Service
 public class AuthService {
 
@@ -48,18 +56,63 @@ public class AuthService {
 
         userRepository.save(user);
     }
+    
+    public void createManager(ManagerDTO managerDTO) {
+        if (userRepository.existsByUsername(managerDTO.getUsername())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already exists");
+        }
+        if (userRepository.existsByEmail(managerDTO.getEmail())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already in use");
+        }
+        if (userRepository.existsByContactNumber(managerDTO.getContactNumber())) {
+        	throw new ResponseStatusException(HttpStatus.CONFLICT, "Contact number already in use");
+        }
 
-    public AuthResponse loginAdmin(LoginDTO loginDTO) {
+        User user = new User();
+        user.setUsername(managerDTO.getUsername());
+        user.setPassword(passwordEncoder.encode(managerDTO.getPassword()));
+        user.setEmail(managerDTO.getEmail());
+        user.setRole(managerDTO.getRole());
+        user.setContactNumber(managerDTO.getContactNumber());
+
+        userRepository.save(user);
+    }
+
+    public AuthResponse login(LoginDTO loginDTO) {
         User user = userRepository.findByUsername(loginDTO.getUsername())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid username"));
+                .orElseThrow(() -> new RuntimeException("Invalid Credentials"));
 
         if (!passwordEncoder.matches(loginDTO.getPassword(), user.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid password");
-        } 
-        String token = jwtUtil.generateToken(user.getUsername(), user.getRole());
-        System.out.println("Token "+ token);
-
+            throw new RuntimeException("Invalid credentials");
+        }
+        
+        Map<String, Object> claims = new HashMap<>();
+        if(!user.getRole().equals("ADMIN")) {
+        	claims.put("isFirstLogin", user.isFirstLogin());
+            claims.put("resetPasswordRequired", user.getResetPasswordRequired());
+        }
+        claims.put("userName",user.getUsername());
+        claims.put("role", user.getRole());
+        String token = jwtUtil.generateToken(user.getUsername(),claims);
+        user.setFirstLogin(false);
+        userRepository.save(user);
         return new AuthResponse(token);
     }
+
+    public String resetPassword(ResetPasswordDTO dto) {
+        User user = userRepository.findByUsername(dto.getUsername())
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!passwordEncoder.matches(dto.getOldPassword(), user.getPassword())) {
+            throw new RuntimeException("Invalid old password");
+        }
+        user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+        user.setResetPasswordRequired(false);
+        user.setFirstLogin(false);
+        userRepository.save(user);
+
+        return "Password reset successfully";
+    }
+
    
 }

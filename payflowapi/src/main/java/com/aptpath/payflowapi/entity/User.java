@@ -34,8 +34,8 @@ public class User {
     @Column(name = "contact_number", length = 15)
     private String contactNumber;
 
-    @Column(name = "temp_password_expired", nullable = false)
-    private boolean tempPasswordExpired = false;
+    @Column(name = "resetPasswordRequired", nullable = false)
+    private boolean resetPasswordRequired = true;
 
     public enum Role {
         ADMIN, HR, MANAGER
@@ -97,11 +97,11 @@ public class User {
 		this.contactNumber = contactNumber;
 	}
 
-	public boolean isTempPasswordExpired() {
-		return tempPasswordExpired;
+	public boolean getResetPasswordRequired() {
+		return resetPasswordRequired;
 	}
 
-	public void setTempPasswordExpired(boolean tempPasswordExpired) {
-		this.tempPasswordExpired = tempPasswordExpired;
+	public void setResetPasswordRequired(boolean resetPasswordRequired) {
+		this.resetPasswordRequired = resetPasswordRequired;
 	}
 }
