@@ -31,7 +31,7 @@ public class SecurityConfig {
                 		"/user/admin/register",
                 		"/user/admin/create",
                 		"/user/reset-password",
-                		"/user/create",
+                		"/employee/create",
                 		"/v3/api-docs/**",
                 		"/swagger-ui/**",
                 		"/swagger-ui.html"

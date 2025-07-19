@@ -37,15 +37,18 @@ public class AuthService {
     private JwtUtil jwtUtil;
 
     public void registerAdmin(AdminDTO adminDTO) {
-        if (userRepository.existsByUsername(adminDTO.getUsername())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already exists");
+    	if (userRepository.existsByRole("ADMIN")) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Admin already exists");
         }
-        if (userRepository.existsByEmail(adminDTO.getEmail())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already in use");
-        }
-        if (userRepository.existsByContactNumber(adminDTO.getContactNumber())) {
-        	throw new ResponseStatusException(HttpStatus.CONFLICT, "Contact number already in use");
-        }
+//        if (userRepository.existsByUsername(adminDTO.getUsername())) {
+//            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already exists");
+//        }
+//        if (userRepository.existsByEmail(adminDTO.getEmail())) {
+//            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already in use");
+//        }
+//        if (userRepository.existsByContactNumber(adminDTO.getContactNumber())) {
+//        	throw new ResponseStatusException(HttpStatus.CONFLICT, "Contact number already in use");
+//        }
 
         User user = new User();
         user.setUsername(adminDTO.getUsername());
@@ -57,7 +60,11 @@ public class AuthService {
         userRepository.save(user);
     }
     
-    public void createManager(ManagerDTO managerDTO) {
+    public void createManager(ManagerDTO managerDTO ,  String headerToken) {
+    	
+    	if (!jwtUtil.validateTokenForAction(headerToken, "ADMIN")) {
+    	    throw new RuntimeException("Only admin can create HR or Manager");
+    	}
         if (userRepository.existsByUsername(managerDTO.getUsername())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already exists");
         }
@@ -91,7 +98,7 @@ public class AuthService {
         	claims.put("isFirstLogin", user.isFirstLogin());
             claims.put("resetPasswordRequired", user.getResetPasswordRequired());
         }
-        claims.put("userName",user.getUsername());
+        claims.put("username",user.getUsername());
         claims.put("role", user.getRole());
         String token = jwtUtil.generateToken(user.getUsername(),claims);
         user.setFirstLogin(false);
@@ -99,7 +106,11 @@ public class AuthService {
         return new AuthResponse(token);
     }
 
-    public String resetPassword(ResetPasswordDTO dto) {
+    public String resetPassword(ResetPasswordDTO dto, String token) {
+    	if (!jwtUtil.validateUsername(token, dto.getUsername())) {
+    	    throw new RuntimeException("Username mismatch - unauthorized password reset");
+    	}
+    	
         User user = userRepository.findByUsername(dto.getUsername())
             .orElseThrow(() -> new RuntimeException("User not found"));
 

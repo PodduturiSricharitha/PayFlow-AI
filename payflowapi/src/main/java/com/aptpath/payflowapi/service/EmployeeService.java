@@ -5,10 +5,12 @@ import com.aptpath.payflowapi.entity.Employee;
 import com.aptpath.payflowapi.entity.User;
 import com.aptpath.payflowapi.repository.EmployeeRepository;
 import com.aptpath.payflowapi.repository.UserRepository;
+import com.aptpath.payflowapi.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.aptpath.payflowapi.*;
+import java.util.List;
+
 @Service
 public class EmployeeService {
 
@@ -17,12 +19,16 @@ public class EmployeeService {
 
     @Autowired
     private UserRepository userRepo;
-
-    public Employee createEmployee(EmployeeDTO dto) {
-    	if (dto.getCreatedByUserId() == null) {
-            throw new IllegalArgumentException("CreatedBy user ID is missing");
-        }
-        User createdBy = userRepo.findById(dto.getCreatedByUserId())
+    
+    @Autowired
+    private JwtUtil jwtUtil;
+    
+    public Employee createEmployee(EmployeeDTO dto,String token) {
+    	if (!jwtUtil.validateTokenForMultipleRoles(token, List.of("HR", "MANAGER"))) {
+    	    throw new RuntimeException("Only HR or Manager can create employees");
+    	}
+    	String username = jwtUtil.extractUsername(token);
+        User createdBy = userRepo.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         Employee employee = new Employee();

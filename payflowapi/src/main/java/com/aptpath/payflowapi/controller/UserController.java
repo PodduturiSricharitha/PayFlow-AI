@@ -18,8 +18,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/user")
 public class UserController {
@@ -42,21 +44,16 @@ public class UserController {
     }
 
     @PostMapping("/admin/create")
-    public ResponseEntity<String> create(@Valid @RequestBody ManagerDTO managerDTO) {
-        userService.createManager(managerDTO);
+    public ResponseEntity<String> create(@Valid @RequestBody ManagerDTO managerDTO,@RequestHeader("Authorization") String token) {
+    	token = token.substring(7);
+        userService.createManager(managerDTO,token);
         return ResponseEntity.ok("User created successfully");
     }
     @PostMapping("/reset-password")
-    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordDTO dto) {
-    	String message = userService.resetPassword(dto);
+    public ResponseEntity<String> resetPassword(@Valid @RequestBody ResetPasswordDTO dto, @RequestHeader("Authorization") String token) {
+    	token = token.substring(7);
+    	String message = userService.resetPassword(dto,token);
         return ResponseEntity.ok(message);
     }
-    @Autowired
-    private EmployeeService employeeService;
 
-    @PostMapping("/create")
-    public ResponseEntity<Employee> createEmployee(@RequestBody EmployeeDTO dto) {
-        Employee employee = employeeService.createEmployee(dto);
-        return ResponseEntity.ok(employee);
-    }
 }

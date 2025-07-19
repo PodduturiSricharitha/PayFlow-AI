@@ -1,9 +1,20 @@
 package com.aptpath.payflowapi.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
+
+@Data
 public class ResetPasswordDTO {
+	
+    @NotBlank(message = "Username is required")
     private String username;
+    
+    @NotBlank(message = "Old password is required")
     private String oldPassword;
+    
+    @NotBlank(message = "New password is required")
     private String newPassword;
+    
 	public String getUsername() {
 		return username;
 	}

@@ -28,16 +28,9 @@ public class EmployeeDTO {
 	public void setPastExperience(String pastExperience) {
 		this.pastExperience = pastExperience;
 	}
-	public Integer getCreatedByUserId() {
-		return createdByUserId;
-	}
-	public void setCreatedByUserId(Integer createdByUserId) {
-		this.createdByUserId = createdByUserId;
-	}
 	private String fullName;
     private int age;
     private String totalExperience;
-    private String pastExperience;
-    private Integer createdByUserId; 
+    private String pastExperience; 
 }
 

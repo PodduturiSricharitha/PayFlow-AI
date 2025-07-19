@@ -14,17 +14,30 @@ import org.springframework.web.server.ResponseStatusException;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<Map<String, String>> handleResponseStatusException(ResponseStatusException ex) {
-        Map<String, String> error = new HashMap<>();
+    public ResponseEntity<Object> handleResponseStatusException(ResponseStatusException ex) {
+        Map<String, Object> error = new HashMap<>();
+        error.put("status", ex.getStatusCode().value());
         error.put("error", ex.getReason());
         return new ResponseEntity<>(error, ex.getStatusCode());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationException(MethodArgumentNotValidException ex) {
-        Map<String, String> errorMap = new HashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(error ->
-            errorMap.put(error.getField(), error.getDefaultMessage()));
-        return new ResponseEntity<>(errorMap, HttpStatus.BAD_REQUEST);
+    public ResponseEntity<Object> handleValidationException(MethodArgumentNotValidException ex) {
+    	Map<String, Object> error = new HashMap<>();
+        Map<String, String> details = new HashMap<>();
+        ex.getBindingResult().getFieldErrors().forEach(err ->
+            details.put(err.getField(), err.getDefaultMessage()));
+        error.put("status", HttpStatus.BAD_REQUEST.value());
+        error.put("error", "Invalid details entered or Missing required fields");
+        error.put("details", details);
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+    
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Object> handleRuntimeException(RuntimeException ex) {
+        Map<String, Object> errorDetails = new HashMap<>();
+        errorDetails.put("status", HttpStatus.BAD_REQUEST.value());
+        errorDetails.put("error", ex.getMessage());
+        return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
     }
 }
